@@ -5,19 +5,18 @@ import { HeroService } from '../@services/hero.service';
 @Component({
   selector: 'at-heroes',
   templateUrl: './heroes.component.html',
-  styleUrls: ['./heroes.component.scss']
+  styleUrls: ['./heroes.component.scss'],
 })
 export class HeroesComponent implements OnInit {
   heroes: Hero[];
 
-  constructor( private heroService: HeroService ) { }
+  constructor(private heroService: HeroService) {}
 
   ngOnInit() {
     this.getHeroes();
   }
 
   getHeroes(): void {
-    this.heroService.getHeroes().subscribe((data: Hero[]) => this.heroes = data);
+    this.heroService.getHeroes().subscribe((data: Hero[]) => (this.heroes = data));
   }
-
 }
