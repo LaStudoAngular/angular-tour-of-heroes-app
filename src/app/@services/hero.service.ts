@@ -4,7 +4,7 @@ import { HEROES } from '../@models/mock-heroes';
 import { Observable, of } from 'rxjs';
 import { MessageService } from './message.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -15,19 +15,29 @@ export class HeroService {
   private heroesUrl = 'api/heroes';
 
   getHeroes(): Observable<Hero[]> {
-    this.log('heroes fetched successfully');
-    return this.http
-      .get<Hero[]>(this.heroesUrl)
-      .pipe(catchError(this.handleError<Hero[]>('getHeroes', [])));
+    return this.http.get<Hero[]>(this.heroesUrl).pipe(
+      tap(_ => this.log(`heroes fetched successfully`)),
+      catchError(this.handleError<Hero[]>('getHeroes', [])),
+    );
   }
 
   getHero(id: number): Observable<Hero> {
-    // this.log('fetched hero id=${id}');
-    this.messageService.addMessage(`HeroService: fetched hero id=${id}`);
-    return of(HEROES.find((el: Hero) => el.id === id));
+    const URL = `${this.heroesUrl}/${id}`;
+    return this.http.get<Hero>(URL).pipe(
+      tap(_ => this.log(`fetched hero id=${id}`)),
+      catchError(this.handleError<Hero>(`getHero id=${id}`)),
+    );
   }
 
   private log(message: string): void {
     this.messageService.addMessage(`HeroService: ${message}`);
+  }
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(error);
+      this.log(`${operation} failed: ${error.message}`);
+      return of(result as T);
+    };
   }
 }
